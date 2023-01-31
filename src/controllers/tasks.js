@@ -1,3 +1,4 @@
+const { findOneAndDelete } = require('../models/Task');
 const Task = require('../models/Task');
 
 const getAllTasks = async (req, res) => {
@@ -35,8 +36,17 @@ const updateTask = (req, res) => {
   res.json({ id: req.params.id, ...req.body });
 };
 
-const deleteTask = (req, res) => {
-  res.json({ id: req.params.id });
+const deleteTask = async (req, res) => {
+  const { id: taskId } = req.params;
+  try {
+    const task = await Task.findOneAndDelete({ _id: taskId });
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    res.status(200).json({ task });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
 };
 
 module.exports = {
