@@ -1,4 +1,3 @@
-const { findOneAndDelete } = require('../models/Task');
 const Task = require('../models/Task');
 
 const getAllTasks = async (req, res) => {
@@ -20,8 +19,8 @@ const createTask = async (req, res) => {
 };
 
 const getTask = async (req, res) => {
-  const { id: taskId } = req.params;
   try {
+    const { id: taskId } = req.params;
     const task = await Task.findOne({ _id: taskId });
     if (!task) {
       return res.status(404).json({ error: 'Task not found' });
@@ -32,13 +31,25 @@ const getTask = async (req, res) => {
   }
 };
 
-const updateTask = (req, res) => {
-  res.json({ id: req.params.id, ...req.body });
+const updateTask = async (req, res) => {
+  try {
+    const { id: taskId } = req.params;
+    const task = await Task.findOneAndUpdate({ _id: taskId }, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    res.status(200).json({ task });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
 };
 
 const deleteTask = async (req, res) => {
-  const { id: taskId } = req.params;
   try {
+    const { id: taskId } = req.params;
     const task = await Task.findOneAndDelete({ _id: taskId });
     if (!task) {
       return res.status(404).json({ error: 'Task not found' });
